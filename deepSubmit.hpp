@@ -134,7 +134,10 @@ int __Mypresubmit_testCapacity() {
 
 int __Mypresubmit_testEmpty() {
     VLVector<int, STATIC_CAP> vec;
-    RETURN_ASSERT_TRUE(vec.empty())
+    ASSERT_TRUE(vec.empty())
+    vec.push_back(1);
+    ASSERT_TRUE(!vec.empty())
+    return 1;
 }
 
 int __Mypresubmit_testClear() {
@@ -142,11 +145,16 @@ int __Mypresubmit_testClear() {
     if (!vec.empty()) {
         return 0;
     }
-
     vec.push_back(1);
     vec.clear();
+    ASSERT_TRUE(vec.empty())
+    std::vector<int> values{1,2,3,4,5,6};
+    vec.insert(vec.begin(), values.begin(), values.end());
+    ASSERT_TRUE(!vec.empty())
+    vec.clear();
+    ASSERT_TRUE(vec.empty());
+    return 1;
 
-    RETURN_ASSERT_TRUE(vec.empty())
 }
 
 int __Mypresubmit_testPopBack() {
@@ -177,13 +185,25 @@ int __Mypresubmit_testPopBack() {
 int __Mypresubmit_testGetElement() {
     VLVector<int, STATIC_CAP> vec;
     vec.push_back(1);
-
     ASSERT_TRUE(vec.at(0) == 1)  // using VLVector::at
-    RETURN_ASSERT_TRUE(vec[0] == 1) // using VLVector::operator[]
+    ASSERT_TRUE(vec[0] == 1) // using VLVector::operator[]
+
+    Student s1 = Student("ilay", 60);
+    Student s2 = Student("ella", 100);
+    VLVector<Student, 3> studentVec{};
+    studentVec.push_back(s1);
+    studentVec.insert(studentVec.begin(), s2);
+    ASSERT_TRUE(studentVec[0].getAverage() == 100);
+    ASSERT_TRUE(studentVec.at(1).getAverage() == 60);
+    return 1;
+
+
 }
 
 int __Mypresubmit_testData() {
     VLVector<int, STATIC_CAP> vec;
+    VLVector<int, 0> vec1{};
+    vec1.data();
     vec.data();
     return 1;
 }
@@ -191,21 +211,34 @@ int __Mypresubmit_testData() {
 int __Mypresubmit_testComparison() {
     VLVector<int, STATIC_CAP> vec1{};
     VLVector<int, STATIC_CAP> vec2{};
+    vec1.push_back(1);
+    vec2.insert(vec2.begin(), 1);
+    ASSERT_TRUE(vec1 == vec2)
+    vec2.insert(vec2.begin() + 1, 2);
+    ASSERT_TRUE(vec1 != vec2)
+    return 1;
 
-    RETURN_ASSERT_TRUE(vec1 == vec2)
 }
 
 int __Mypresubmit_testAssignment() {
-    VLVector<int, STATIC_CAP> vec1{};
+    VLVector<int, 2> vec1{};
     vec1.push_back(1);
 
-    VLVector<int, STATIC_CAP> vec2 = vec1;
+    VLVector<int, 2> vec2 = vec1;
+    ASSERT_TRUE(vec1 == vec2);
+    vec1.push_back(2);
+    VLVector<int, 2> vec3 = vec1;
+    ASSERT_TRUE(vec3.capacity() == 4);
     return 1;
 }
 
 int __Mypresubmit_testIterator() {
     VLVector<int, STATIC_CAP> vec;
+    vec.push_back(1);
 
+    auto it = vec.begin();
+    it++;
+    ASSERT_TRUE(it == vec.end());
     vec.begin();
     vec.end();
     vec.cbegin();
@@ -236,6 +269,11 @@ int __Mypresubmit_testInsert1() {
     ASSERT_TRUE(vec2[4] == 2);
 
     auto it5 = vec2.insert(it4, 8);
+//    auto b = vec2.begin();
+//    while (b!= vec2.end())
+//    {
+//        std::cout << *b << std::endl;
+//    }
 
     ASSERT_TRUE(vec2[3] == 8);
     ASSERT_TRUE(vec2[4] == 9);
@@ -248,6 +286,11 @@ int __Mypresubmit_testInsert1() {
     ASSERT_TRUE(vec2[6] == 2);
     ASSERT_TRUE(vec2.capacity() == 10);
     ASSERT_TRUE(vec2.size() == 7);
+
+    VLVector<int, 3> vector{};
+    vector.push_back(1);
+    vector.insert(vector.begin(), 0);
+    ASSERT_VLA_PROPERTIES(vector, false, 3, 2);
     return 1;
 }
 
@@ -259,6 +302,7 @@ int __Mypresubmit_testInsert2() {
     ++it;
     vec.insert(it, values.begin(), values.end());
     ASSERT_TRUE(vec.size() == 5)
+
     VLVector<int, 3> vec2{};
     auto it2 = vec2.insert(vec2.begin(), vec.begin(), vec.end());
     ASSERT_TRUE(vec2.capacity() == 7);
@@ -358,10 +402,10 @@ int runMyPreSubmissionChecks() {
     PRESUBMISSION_ASSERT(__Mypresubmit_testErase1)
     PRESUBMISSION_ASSERT( __Mypresubmit_testErase2)
     PRESUBMISSION_ASSERT(__Mypresubmit_testPopBack)
-    PRESUBMISSION_ASSERT(__Mypresubmit_testEmpty) // TODO follow from this one
+    PRESUBMISSION_ASSERT(__Mypresubmit_testEmpty)
     PRESUBMISSION_ASSERT(__Mypresubmit_testClear)
     PRESUBMISSION_ASSERT(__Mypresubmit_testGetElement)
-    PRESUBMISSION_ASSERT(__Mypresubmit_testData)
+    PRESUBMISSION_ASSERT(__Mypresubmit_testData) // TODO follow from this one
     PRESUBMISSION_ASSERT(__Mypresubmit_testComparison)
     PRESUBMISSION_ASSERT(__Mypresubmit_testAssignment)
     PRESUBMISSION_ASSERT(__Mypresubmit_testIterator)
