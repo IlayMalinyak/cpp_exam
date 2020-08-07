@@ -34,9 +34,9 @@ public:
 //        Iterator(const Iterator& rhs): cur(rhs.cur){}
         // basic operators
         reference operator*() const {return *cur; }
-        value_type* operator->() const {return cur; }
+//        value_type* operator->() const {return cur; }
         reference operator*() {return *cur; }
-        value_type* operator->() {return cur; }
+//        value_type* operator->() {return cur; }
         reference operator[](difference_type diff) const {return this->cur[diff]; }
         reference operator[](difference_type diff) {return this->cur[diff]; }
 //        Iterator& operator=(const Iterator& rhs)
@@ -106,8 +106,8 @@ public:
 //        ConstIterator(const ConstIterator& rhs): cur(rhs.cur){}
         // basic operators
         value_type operator*() const {return *cur; }
-        value_type* operator->() const {return cur; }
-        value_type* operator->() {return cur; }
+//        value_type* operator->() const {return cur; }
+//        value_type* operator->() {return cur; }
 //        ConstIterator& operator=(const ConstIterator& rhs)
 //        {
 //            this->cur = rhs.cur;
@@ -303,14 +303,18 @@ public:
     iterator insert(iterator pos, InputIterator first, InputIterator last)
     {
         int numElem = std::distance(first, last);
+        int off = std::distance(pos, this->end());
         if (_size + numElem > StaticCapacity && _size <= StaticCapacity)
         {
             _dynamicCap = (int) (3 * (_size + numElem) / 2);
             pos = _changeToDynamic(pos);
         }
-        std::copy(pos, pos + numElem, pos + numElem);
+        T* tmp = new T[off];
+        std::copy(pos, pos + off, iterator(&tmp[0]));
+        std::copy(iterator(&tmp[0]), iterator(&tmp[off]), pos + numElem);
         std::copy(first, last, pos);
         _size += numElem;
+        delete[] tmp;
         pos = updateCapacity(pos);
         return pos;
     }
@@ -344,14 +348,7 @@ public:
      * @brief return the data structure that store the container elemnets
      * @return pointer to data structure
      */
-    T* data()
-    {
-        if (_size > 0)
-        {
-            return _size > StaticCapacity? _dynamicArr:_staticArr;
-        }
-        return nullptr;
-    }
+    T* data() {return _size > StaticCapacity? _dynamicArr:_staticArr;}
 
     /**
      * @brief assignment operator
@@ -479,19 +476,22 @@ template <class T, size StaticCapacity>
 typename VLVector<T, StaticCapacity>::iterator VLVector<T, StaticCapacity>
         ::insert(iterator pos, const T& value)
 {
-    if (_size == StaticCapacity)
-    {
-        pos = _changeToDynamic(pos);
-    }
-    _size++;
-    size_t elementsToMove = std::distance(pos, this->end() - 1);
-    T* tmp = new T[elementsToMove];
-    std::copy(pos, this->end(), Iterator(&tmp[0]));
-    std::copy(Iterator(&tmp[0]), Iterator(&tmp[elementsToMove]), pos + 1);
-    delete[] tmp;
-    pos = updateCapacity(pos);
-    *pos = value;
-    return pos;
+            auto first = const_iterator(&value);
+            return insert(pos, first, first + 1);
+
+//    if (_size == StaticCapacity)
+//    {
+//        pos = _changeToDynamic(pos);
+//    }
+//    _size++;
+//    size_t elementsToMove = std::distance(pos, this->end() - 1);
+//    T* tmp = new T[elementsToMove];
+//    std::copy(pos, this->end(), Iterator(&tmp[0]));
+//    std::copy(Iterator(&tmp[0]), Iterator(&tmp[elementsToMove]), pos + 1);
+//    delete[] tmp;
+//    pos = updateCapacity(pos);
+//    *pos = value;
+//    return pos;
 }
 
 template <class T, size StaticCapacity>
@@ -508,14 +508,15 @@ void VLVector<T, StaticCapacity>::pop_back()
 template <class T, size StaticCapacity>
 typename VLVector<T, StaticCapacity>::iterator VLVector<T, StaticCapacity>::erase(iterator pos)
 {
-    std::move(pos + 1, this->end(), pos);
-    if (_size - 1 == StaticCapacity)
-    {
-        pos = _changeToStatic(pos);
-    }
-    _dynamicCap = _size == StaticCapacity? 0 : _dynamicCap;
-    _size--;
-    return pos;
+    return erase(pos, pos + 1);
+//    std::move(pos + 1, this->end(), pos);
+//    if (_size - 1 == StaticCapacity)
+//    {
+//        pos = _changeToStatic(pos);
+//    }
+//    _dynamicCap = _size == StaticCapacity? 0 : _dynamicCap;
+//    _size--;
+//    return pos;
 }
 
 template <class T, size StaticCapacity>
@@ -528,7 +529,7 @@ typename VLVector<T, StaticCapacity>::iterator VLVector<T, StaticCapacity>::eras
     if (newSize <= StaticCapacity)
     {
         first = _changeToStatic(first);
-        _dynamicCap = newSize == StaticCapacity? (int) (3 * (newSize + 1) / 2) : StaticCapacity;
+        _dynamicCap = newSize == StaticCapacity? (int) (3 * (newSize + 1) / 2) : 0;
     }
     _size = newSize;
     return first;
