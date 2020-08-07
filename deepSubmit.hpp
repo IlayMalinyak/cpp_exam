@@ -195,6 +195,25 @@ int __Mypresubmit_testGetElement() {
     studentVec.insert(studentVec.begin(), s2);
     ASSERT_TRUE(studentVec[0].getAverage() == 100);
     ASSERT_TRUE(studentVec.at(1).getAverage() == 60);
+    try
+    {
+        int x = vec.at(-1);
+        x+= 1;
+    }
+    catch (const std::out_of_range &e)
+    {
+        std::cout << e.what() << std::endl;
+    }
+    try
+    {
+        int x = vec.at(1);
+        x+= 1;
+    }
+    catch (const std::out_of_range &e)
+    {
+        std::cout << e.what() << std::endl;
+    }
+
     return 1;
 
 
@@ -235,10 +254,25 @@ int __Mypresubmit_testAssignment() {
 int __Mypresubmit_testIterator() {
     VLVector<int, STATIC_CAP> vec;
     vec.push_back(1);
-
+    vec.push_back(2);
+    vec.push_back(3);
+    vec.push_back(4);
     auto it = vec.begin();
+    for (int i = 0; i < 3; i++)
+    {
+        int x = *it;
+        std::cout << x << std::endl;
+        *it = i + 10;
+
+        it++;
+        --it;
+        ++it;
+        it--;
+        it++;
+    }
     it++;
     ASSERT_TRUE(it == vec.end());
+    ASSERT_TRUE(it >= vec.begin());
     vec.begin();
     vec.end();
     vec.cbegin();
