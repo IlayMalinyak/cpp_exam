@@ -4,6 +4,7 @@
 
 #ifndef EXAMCPP_VLVECTOR_HPP
 #define EXAMCPP_VLVECTOR_HPP
+#define OUT_OF_BOUND_ERR "Index out of bound"
 #include <iostream>
 
 typedef unsigned int size;
@@ -23,67 +24,89 @@ public:
     {
     public:
         typedef T value_type;
-        typedef T& reference;
-        typedef T* pointer;
+        typedef T &reference;
+        typedef T *pointer;
         typedef typename std::iterator<std::random_access_iterator_tag, T>::difference_type
                 difference_type;
         typedef std::random_access_iterator_tag iterator_category;
+
         // constructors
-        Iterator(): cur(nullptr){}
-        explicit Iterator(T* ptr): cur(ptr){}
-//        Iterator(const Iterator& rhs): cur(rhs.cur){}
+        Iterator() : cur(nullptr){}
+        explicit Iterator(T *ptr) : cur(ptr){}
+
         // basic operators
         reference operator*() const {return *cur; }
-//        value_type* operator->() const {return cur; }
+
         reference operator*() {return *cur; }
-//        value_type* operator->() {return cur; }
+
         reference operator[](difference_type diff) const {return this->cur[diff]; }
+
         reference operator[](difference_type diff) {return this->cur[diff]; }
-//        Iterator& operator=(const Iterator& rhs)
-//        {
-//            this->cur = rhs.cur;
-//            return *this;
-//        }
-//        ~Iterator() {cur = nullptr; }
-        Iterator& operator++(){++this->cur; return *this; }
+
+        //increment decrement
+        Iterator &operator++()
+        {
+            ++this->cur;
+            return *this;
+        }
+
         Iterator operator++(int)
         {
             pointer tmp = this->cur;
             ++cur;
             return Iterator(tmp);
         }
-        Iterator& operator--(){--this->cur; return *this; }
+
+        Iterator &operator--()
+        {
+            --this->cur;
+            return *this;
+        }
+
         Iterator operator--(int)
         {
             pointer tmp = this->cur;
             --cur;
             return Iterator(tmp);
         }
+
         //arithmetic
         Iterator operator+(difference_type diff) const {return Iterator(this->cur + diff); }
-        friend Iterator operator+(difference_type diff, const Iterator& rhs)
+
+        friend Iterator operator+(difference_type diff, const Iterator &rhs)
         {
-            return Iterator (diff + rhs.cur);
+            return Iterator(diff + rhs.cur);
         }
+
         Iterator operator-(difference_type diff) const {return Iterator(cur - diff); }
-        difference_type operator-(const Iterator& rhs) const {return cur - rhs.cur; }
-        Iterator& operator+=(difference_type diff)
+
+        difference_type operator-(const Iterator &rhs) const {return cur - rhs.cur; }
+
+        Iterator &operator+=(difference_type diff)
         {
             cur += diff;
             return *this;
         }
-        Iterator& operator-=(difference_type diff)
+
+        Iterator &operator-=(difference_type diff)
         {
             cur -= diff;
             return *this;
         }
+
         // comparisons
-        bool operator==(const Iterator& other) const {return cur == other.cur; }
-        bool operator!=(const Iterator& other) const {return cur != other.cur; }
-        bool operator<(const Iterator& other) const {return cur < other.cur; }
-        bool operator<=(const Iterator& other) const {return cur <= other.cur; }
-        bool operator>(const Iterator& other) const {return cur > other.cur; }
-        bool operator>=(const Iterator& other) const {return cur >= other.cur; }
+        bool operator==(const Iterator &other) const {return cur == other.cur; }
+
+        bool operator!=(const Iterator &other) const {return cur != other.cur; }
+
+        bool operator<(const Iterator &other) const {return cur < other.cur; }
+
+        bool operator<=(const Iterator &other) const {return cur <= other.cur; }
+
+        bool operator>(const Iterator &other) const {return cur > other.cur; }
+
+        bool operator>=(const Iterator &other) const {return cur >= other.cur; }
+
     protected:
         pointer cur;
     };
@@ -95,74 +118,88 @@ public:
     {
     public:
         typedef T value_type;
-        typedef const T& reference;
-        typedef const T* pointer;
+        typedef const T &reference;
+        typedef const T *pointer;
         typedef typename std::iterator<std::random_access_iterator_tag, T>::difference_type
                 difference_type;
         typedef std::random_access_iterator_tag iterator_category;
+
         // constructors
-        ConstIterator(): cur(nullptr){}
-        explicit ConstIterator(const T* ptr): cur(ptr){}
-//        ConstIterator(const ConstIterator& rhs): cur(rhs.cur){}
+        ConstIterator() : cur(nullptr){}
+        explicit ConstIterator(const T *ptr) : cur(ptr){}
         // basic operators
         value_type operator*() const {return *cur; }
-//        value_type* operator->() const {return cur; }
-//        value_type* operator->() {return cur; }
-//        ConstIterator& operator=(const ConstIterator& rhs)
-//        {
-//            this->cur = rhs.cur;
-//            return *this;
-//        }
-//        ~ConstIterator() {cur = nullptr; }
+
         reference operator[](difference_type diff) const {return this->cur[diff]; }
-        ConstIterator& operator++(){++this->cur; return *this; }
+        // increment decrement
+        ConstIterator &operator++()
+        {
+            ++this->cur;
+            return *this;
+        }
+
         ConstIterator operator++(int)
         {
             pointer tmp = this->cur;
             ++cur;
             return ConstIterator(tmp);
         }
-        ConstIterator& operator--(){cur--; return *this; }
+
+        ConstIterator &operator--()
+        {
+            cur--;
+            return *this;
+        }
+
         ConstIterator operator--(int)
         {
             pointer tmp = this->cur;
             --cur;
             return ConstIterator(tmp);
         }
+
         // arithmetic
         ConstIterator operator+(difference_type diff) const
         {
             return ConstIterator(this->cur + diff);
         }
-        friend ConstIterator operator+(difference_type diff, const ConstIterator& rhs)
+
+        friend ConstIterator operator+(difference_type diff, const ConstIterator &rhs)
         {
             return ConstIterator(diff + rhs.cur);
         }
+
         ConstIterator operator-(difference_type diff) const
         {
             return ConstIterator(this->cur - diff);
         }
-        difference_type operator-(const ConstIterator& rhs) const {return cur - rhs.cur; }
-        ConstIterator& operator+=(difference_type diff)
+
+        difference_type operator-(const ConstIterator &rhs) const {return cur - rhs.cur; }
+
+        ConstIterator &operator+=(difference_type diff)
         {
             cur += diff;
             return *this;
         }
-        ConstIterator& operator-=(difference_type diff)
+
+        ConstIterator &operator-=(difference_type diff)
         {
             cur -= diff;
             return *this;
         }
+
         // comparisons
-        bool operator==(const ConstIterator& other) const {return cur == other.cur; }
-        bool operator!=(const ConstIterator& other) const {return cur != other.cur; }
-        bool operator<(const ConstIterator& other) const {return cur < other.cur; }
-        bool operator<=(const ConstIterator& other) const {return cur <= other.cur; }
-        bool operator>(const ConstIterator& other) const {return cur > other.cur; }
-        bool operator>=(const ConstIterator& other) const {return cur >= other.cur; }
+        bool operator==(const ConstIterator &other) const {return cur == other.cur; }
+        bool operator!=(const ConstIterator &other) const {return cur != other.cur; }
+        bool operator<(const ConstIterator &other) const { return cur < other.cur; }
+        bool operator<=(const ConstIterator &other) const {return cur <= other.cur; }
+        bool operator>(const ConstIterator &other) const {return cur > other.cur; }
+        bool operator>=(const ConstIterator &other) const {return cur >= other.cur; }
+
     protected:
-        const T* cur;
+        const T *cur;
     };
+
     typedef Iterator iterator;
     typedef ConstIterator const_iterator;
 
@@ -171,16 +208,14 @@ public:
      */
     VLVector()
     {
-//        _dynamicArr(), _staticArr();
-        updateCapacity(Iterator());
+        _updateCapacity(Iterator());
     }
-
 
     /**
      * @brief copy constructor
      * @param vec VLVector object
      */
-    VLVector(const VLVector& vec): VLVector(vec.begin(), vec.end()){}
+    VLVector(const VLVector &vec) : VLVector(vec.begin(), vec.end()){}
 
     /**
      * @brief constructor in range [first last)
@@ -188,54 +223,53 @@ public:
      * @param first iterator to first element to copy
      * @param last iterator to last element to copy
      */
-    template <class InputIterator>
-    VLVector(InputIterator first,  InputIterator last);
+    template<class InputIterator>
+    VLVector(InputIterator first, InputIterator last);
 
     /**
      * @brief destructor
      */
     ~VLVector()
     {
-        if(_size > StaticCapacity)
+        if (_size > StaticCapacity)
         {
             delete[] _dynamicArr;
         }
     }
 
-
     // begin and end for const and non-const iterator
     iterator begin()
     {
-        return _size > StaticCapacity? iterator(_dynamicArr):iterator
-        (_staticArr);
+        return _size > StaticCapacity ? iterator(_dynamicArr) : iterator
+                (_staticArr);
     }
 
     iterator end()
     {
-        return _size > StaticCapacity? iterator(_dynamicArr + _size):iterator
-        (_staticArr + _size);
+        return _size > StaticCapacity ? iterator(_dynamicArr + _size) : iterator
+                (_staticArr + _size);
     }
 
     const_iterator begin() const
     {
-        return _size > StaticCapacity? const_iterator(_dynamicArr):const_iterator(_staticArr);
+        return _size > StaticCapacity ? const_iterator(_dynamicArr) : const_iterator(_staticArr);
     }
 
     const_iterator end() const
     {
-        return _size > StaticCapacity? const_iterator(_dynamicArr + _size):
-        const_iterator(_staticArr + _size);
+        return _size > StaticCapacity ? const_iterator(_dynamicArr + _size) :
+               const_iterator(_staticArr + _size);
     }
 
     const_iterator cbegin() const
     {
-        return _size > StaticCapacity?const_iterator(_dynamicArr):const_iterator(_staticArr);
+        return _size > StaticCapacity ? const_iterator(_dynamicArr) : const_iterator(_staticArr);
     }
 
     const_iterator cend() const
     {
-        return _size > StaticCapacity?const_iterator(_dynamicArr + _size):
-        const_iterator(_staticArr + _size);
+        return _size > StaticCapacity ? const_iterator(_dynamicArr + _size) :
+               const_iterator(_staticArr + _size);
     }
 
     /**
@@ -249,20 +283,20 @@ public:
      * where C is StaticCapacity ans s _size
      * @return capacity
      */
-    size_t capacity()  {return _dynamicCap > StaticCapacity? _dynamicCap:StaticCapacity; }
+    size_t capacity() {return _dynamicCap > StaticCapacity ? _dynamicCap : StaticCapacity; }
 
     /**
      * @brief check if container is empty
      * @return bool of emptiness
      */
-    bool empty(){return _size == 0; }
+    bool empty() {return _size == 0; }
 
     /**
      * @brief return a reference to the element at specified location pos, with bounds checking
      * @param pos position of element
      * @return Reference to the requested element.
      */
-    T& at(size_t pos)
+    T &at(size_t pos)
     {
         _checkBounds(pos);
         return (*this)[pos];
@@ -271,7 +305,7 @@ public:
     /**
      * @brief const version of at function
      */
-    const T& at(size_t pos) const
+    const T &at(size_t pos) const
     {
         _checkBounds(pos);
         return (*this)[pos];
@@ -281,7 +315,7 @@ public:
      * @brief insert value at end
      * @param value value to insert
      */
-    void push_back(const T& value);
+    void push_back(const T &value);
 
     /**
      * @brief insert value at position pos
@@ -289,18 +323,22 @@ public:
      * @param value insertion value
      * @return iterator to the new element
      */
-    iterator insert(iterator pos, const T& value);
+    iterator insert(iterator pos, const T &value)
+    {
+        auto first = const_iterator(&value);
+        return insert(pos, first, first + 1);
+    }
 
-    template <class InputIterator>
     /**
-     * @brief insert elements in range [first last)
-     * @tparam InputIterator iterator satisfied input-iterator API
-     * @param pos iterator to position of insertion
-     * @param first first element in range
-     * @param last last element in range
-     * @return iterator to the first element in the new range
-     */
-    iterator insert(iterator pos, InputIterator first, InputIterator last)
+    * @brief insert elements in range [first last)
+    * @tparam InputIterator iterator satisfied input-iterator API
+    * @param pos iterator to position of insertion
+    * @param first first element in range
+    * @param last last element in range
+    * @return iterator to the first element in the new range
+    */
+    template<class InputIterator>
+    iterator insert(Iterator pos, InputIterator first, InputIterator last)
     {
         int numElem = std::distance(first, last);
         int off = std::distance(pos, this->end());
@@ -315,7 +353,7 @@ public:
         std::copy(first, last, pos);
         _size += numElem;
         delete[] tmp;
-        pos = updateCapacity(pos);
+        pos = _updateCapacity(pos);
         return pos;
     }
 
@@ -329,7 +367,7 @@ public:
      * @param pos iterator to position
      * @return iterator to the element to the right of the removed one
      */
-    iterator erase(iterator pos);
+    iterator erase(iterator pos) {return erase(pos, pos + 1); }
 
     /**
      * @brief remove elements in range [first last)
@@ -348,33 +386,40 @@ public:
      * @brief return the data structure that store the container elemnets
      * @return pointer to data structure
      */
-    T* data() {return _size > StaticCapacity? _dynamicArr:_staticArr;}
+    T *data() {return _size > StaticCapacity ? _dynamicArr : _staticArr; }
 
     /**
      * @brief assignment operator
      * @param other VLVector to copy from
      */
-    VLVector& operator=(const VLVector& other);
+    VLVector &operator=(const VLVector &other);
 
     /**
      * @brief Returns a reference to the element at specified location pos. No bounds checking
      * @param pos position of the element to return
      * @return reference to the element at pos
      */
-    T& operator[](const size_t pos) {return _size > StaticCapacity?
-    _dynamicArr[pos]:_staticArr[pos]; }
+    T &operator[](const size_t pos)
+    {
+        return _size > StaticCapacity ?
+               _dynamicArr[pos] : _staticArr[pos];
+    }
 
     /**
      * @brief const version of operator []
      */
-    T& operator[](const size_t pos) const {return _size > StaticCapacity?
-    _dynamicArr[pos]:_staticArr[pos]; }
+    T &operator[](const size_t pos) const
+    {
+        return _size > StaticCapacity ?
+               _dynamicArr[pos] : _staticArr[pos];
+    }
 
 private:
-    T* _dynamicArr{0}; //dynamic array
+    T *_dynamicArr{0}; //dynamic array
     T _staticArr[StaticCapacity]; // static array
     size_t _size = 0; // container size
     size_t _dynamicCap = 0; // dynamic capacity
+
     /**
      * @brief change data from static to dynamic memory
      * @param pos iterator to element in static array
@@ -398,31 +443,17 @@ private:
      */
     void _checkBounds(int pos)
     {
-        if (pos < 0 || pos > int(_size))
-        {throw std::out_of_range("Index out of range"); }
+        if (pos < 0 || pos >= int(_size))
+        {
+            throw std::out_of_range(OUT_OF_BOUND_ERR);
+        }
     }
 
     /**
      * @brief update capacity and increase dynamic memory
      */
-    Iterator updateCapacity(Iterator pos)
-    {
-        if (_size == StaticCapacity)
-        {
-            _dynamicCap = (int) (3 * (_size + 1) / 2);
-        }
-        if (_size == _dynamicCap && _size > StaticCapacity)
-        {
-            _dynamicCap = (int) (3 * (_size + 1) / 2);
-            T *newDynamicArr = new T[_dynamicCap];
-            auto newPos = std::move(this->begin(), pos, Iterator(&newDynamicArr[0]));
-            std::move(pos, this->end(), Iterator(newPos));
-            delete[] _dynamicArr;
-            _dynamicArr = newDynamicArr;
-            return Iterator(newPos);
-        }
-        return pos;
-    }
+    Iterator _updateCapacity(Iterator pos);
+
 };
 /**
  * @brief operator ==
@@ -456,7 +487,7 @@ VLVector<T, StaticCapacity>::VLVector(InputIterator first, InputIterator last)
         this->push_back(*it);
     }
     _dynamicCap = (int) (3 * (_size ) / 2);
-    updateCapacity(Iterator());
+    _updateCapacity(Iterator());
 }
 
 template <class T, size StaticCapacity>
@@ -469,30 +500,30 @@ void VLVector<T, StaticCapacity>::push_back(const T& value)
     _size++;
     size_t diff = _size - 1;
     *(this->begin() + diff) = value;
-    updateCapacity(this->begin());
+    _updateCapacity(this->begin());
 }
 
-template <class T, size StaticCapacity>
-typename VLVector<T, StaticCapacity>::iterator VLVector<T, StaticCapacity>
-        ::insert(iterator pos, const T& value)
-{
-            auto first = const_iterator(&value);
-            return insert(pos, first, first + 1);
-
-//    if (_size == StaticCapacity)
+//template <class InputIterator>
+//template <class T, size StaticCapacity>
+//typename VLVector<T, StaticCapacity>::Iterator VLVector<T, StaticCapacity>::insert(Iterator pos,
+//        InputIterator first, InputIterator last)
+//{
+//    int numElem = std::distance(first, last);
+//    int off = std::distance(pos, this->end());
+//    if (_size + numElem > StaticCapacity && _size <= StaticCapacity)
 //    {
+//        _dynamicCap = (int) (3 * (_size + numElem) / 2);
 //        pos = _changeToDynamic(pos);
 //    }
-//    _size++;
-//    size_t elementsToMove = std::distance(pos, this->end() - 1);
-//    T* tmp = new T[elementsToMove];
-//    std::copy(pos, this->end(), Iterator(&tmp[0]));
-//    std::copy(Iterator(&tmp[0]), Iterator(&tmp[elementsToMove]), pos + 1);
+//    T* tmp = new T[off];
+//    std::copy(pos, pos + off, iterator(&tmp[0]));
+//    std::copy(iterator(&tmp[0]), iterator(&tmp[off]), pos + numElem);
+//    std::copy(first, last, pos);
+//    _size += numElem;
 //    delete[] tmp;
-//    pos = updateCapacity(pos);
-//    *pos = value;
+//    pos = _updateCapacity(pos);
 //    return pos;
-}
+//}
 
 template <class T, size StaticCapacity>
 void VLVector<T, StaticCapacity>::pop_back()
@@ -503,20 +534,6 @@ void VLVector<T, StaticCapacity>::pop_back()
     }
     _dynamicCap = _size == StaticCapacity? 0 : _dynamicCap;
     _size--;
-}
-
-template <class T, size StaticCapacity>
-typename VLVector<T, StaticCapacity>::iterator VLVector<T, StaticCapacity>::erase(iterator pos)
-{
-    return erase(pos, pos + 1);
-//    std::move(pos + 1, this->end(), pos);
-//    if (_size - 1 == StaticCapacity)
-//    {
-//        pos = _changeToStatic(pos);
-//    }
-//    _dynamicCap = _size == StaticCapacity? 0 : _dynamicCap;
-//    _size--;
-//    return pos;
 }
 
 template <class T, size StaticCapacity>
@@ -585,8 +602,28 @@ typename VLVector<T, StaticCapacity>::Iterator VLVector<T, StaticCapacity>::_cha
 }
 
 template <class T, size StaticCapacity>
-bool operator==(const VLVector<T, StaticCapacity>& lhs, const VLVector<T, StaticCapacity>& rhs)
+typename VLVector<T, StaticCapacity>::Iterator VLVector<T, StaticCapacity>::_updateCapacity
+(Iterator pos)
+{
+    if (_size == StaticCapacity)
+    {
+        _dynamicCap = (int) (3 * (_size + 1) / 2);
+    }
+    if (_size == _dynamicCap && _size > StaticCapacity)
+    {
+        _dynamicCap = (int) (3 * (_size + 1) / 2);
+        T *newDynamicArr = new T[_dynamicCap];
+        auto newPos = std::move(this->begin(), pos, Iterator(&newDynamicArr[0]));
+        std::move(pos, this->end(), Iterator(newPos));
+        delete[] _dynamicArr;
+        _dynamicArr = newDynamicArr;
+        return Iterator(newPos);
+    }
+    return pos;
+}
 
+template <class T, size StaticCapacity>
+bool operator==(const VLVector<T, StaticCapacity>& lhs, const VLVector<T, StaticCapacity>& rhs)
 {
     if(lhs.size() != rhs.size())
     {
