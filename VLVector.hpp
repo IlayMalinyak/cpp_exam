@@ -5,10 +5,11 @@
 #ifndef EXAMCPP_VLVECTOR_HPP
 #define EXAMCPP_VLVECTOR_HPP
 #define OUT_OF_BOUND_ERR "Index out of bound"
+#define DEFAULT_CAPACITY 16
 #include <iostream>
 
 typedef unsigned int size;
-template<class T, size StaticCapacity = 16>
+template<class T, size StaticCapacity = DEFAULT_CAPACITY>
 /**
  * @brief VLVector is a container that utilize static and dynamic memory
  * @tparam T
@@ -46,27 +47,27 @@ public:
         //increment decrement
         Iterator &operator++()
         {
-            ++this->cur;
+            ++cur;
             return *this;
         }
 
         Iterator operator++(int)
         {
             pointer tmp = this->cur;
-            ++cur;
+            ++*this;
             return Iterator(tmp);
         }
 
         Iterator &operator--()
         {
-            --this->cur;
+            --cur;
             return *this;
         }
 
         Iterator operator--(int)
         {
             pointer tmp = this->cur;
-            --cur;
+            --*this;
             return Iterator(tmp);
         }
 
@@ -134,14 +135,14 @@ public:
         // increment decrement
         ConstIterator &operator++()
         {
-            ++this->cur;
+            ++cur;
             return *this;
         }
 
         ConstIterator operator++(int)
         {
-            pointer tmp = this->cur;
-            ++cur;
+            pointer tmp = cur;
+            ++*this;
             return ConstIterator(tmp);
         }
 
@@ -208,7 +209,7 @@ public:
      */
     VLVector()
     {
-        _updateCapacity(Iterator());
+//        _updateCapacity(Iterator());
     }
 
     /**
@@ -224,7 +225,7 @@ public:
      * @param last iterator to last element to copy
      */
     template<class InputIterator>
-    VLVector(InputIterator first, InputIterator last);
+    VLVector(InputIterator first, InputIterator last) {insert(this->begin(), first, last); }
 
     /**
      * @brief destructor
@@ -237,7 +238,7 @@ public:
         }
     }
 
-    // begin and end for const and non-const iterator
+    // begin and end for non-const iterator
     iterator begin()
     {
         return _size > StaticCapacity ? iterator(_dynamicArr) : iterator
@@ -249,7 +250,7 @@ public:
         return _size > StaticCapacity ? iterator(_dynamicArr + _size) : iterator
                 (_staticArr + _size);
     }
-
+    // begin and end for const iterator
     const_iterator begin() const
     {
         return _size > StaticCapacity ? const_iterator(_dynamicArr) : const_iterator(_staticArr);
@@ -260,7 +261,7 @@ public:
         return _size > StaticCapacity ? const_iterator(_dynamicArr + _size) :
                const_iterator(_staticArr + _size);
     }
-
+    // cbegin and cend for const iterator
     const_iterator cbegin() const
     {
         return _size > StaticCapacity ? const_iterator(_dynamicArr) : const_iterator(_staticArr);
@@ -283,13 +284,13 @@ public:
      * where C is StaticCapacity ans s _size
      * @return capacity
      */
-    size_t capacity() {return _dynamicCap > StaticCapacity ? _dynamicCap : StaticCapacity; }
+    size_t capacity() const {return _dynamicCap > StaticCapacity ? _dynamicCap : StaticCapacity; }
 
     /**
      * @brief check if container is empty
      * @return bool of emptiness
      */
-    bool empty() {return _size == 0; }
+    bool empty() const {return _size == 0; }
 
     /**
      * @brief return a reference to the element at specified location pos, with bounds checking
@@ -338,25 +339,7 @@ public:
     * @return iterator to the first element in the new range
     */
     template<class InputIterator>
-    iterator insert(Iterator pos, InputIterator first, InputIterator last)
-    {
-        int numElem = std::distance(first, last);
-        int off = std::distance(pos, this->end());
-        if (_size + numElem > StaticCapacity && _size <= StaticCapacity)
-        {
-            _dynamicCap = (int) (3 * (_size + numElem) / 2);
-            pos = _changeToDynamic(pos);
-        }
-        T* tmp = new T[off];
-        std::copy(pos, pos + off, iterator(&tmp[0]));
-        std::copy(iterator(&tmp[0]), iterator(&tmp[off]), pos + numElem);
-        std::copy(first, last, pos);
-        _size += numElem;
-        delete[] tmp;
-        pos = _updateCapacity(pos);
-        return pos;
-    }
-
+    iterator insert(Iterator pos, InputIterator first, InputIterator last);
     /**
      * @brief remove last element
      */
@@ -386,20 +369,20 @@ public:
      * @brief return the data structure that store the container elemnets
      * @return pointer to data structure
      */
-    T *data() {return _size > StaticCapacity ? _dynamicArr : _staticArr; }
+    T* data() {return _size > StaticCapacity ? _dynamicArr : _staticArr; }
 
     /**
      * @brief assignment operator
      * @param other VLVector to copy from
      */
-    VLVector &operator=(const VLVector &other);
+    VLVector& operator=(const VLVector &other);
 
     /**
      * @brief Returns a reference to the element at specified location pos. No bounds checking
      * @param pos position of the element to return
      * @return reference to the element at pos
      */
-    T &operator[](const size_t pos)
+    T& operator[](size_t pos)
     {
         return _size > StaticCapacity ?
                _dynamicArr[pos] : _staticArr[pos];
@@ -408,7 +391,7 @@ public:
     /**
      * @brief const version of operator []
      */
-    T &operator[](const size_t pos) const
+    const T& operator[](size_t pos) const
     {
         return _size > StaticCapacity ?
                _dynamicArr[pos] : _staticArr[pos];
@@ -441,7 +424,7 @@ private:
      * @brief check bounds of index
      * @param pos index
      */
-    void _checkBounds(int pos)
+    void _checkBounds(int pos) const
     {
         if (pos < 0 || pos >= int(_size))
         {
@@ -479,22 +462,11 @@ bool operator!=(const VLVector<T, StaticCapacity>& lhs, const VLVector<T, Static
 {return !(lhs == rhs); }
 
 template <class T, size StaticCapacity>
-template <class InputIterator>
-VLVector<T, StaticCapacity>::VLVector(InputIterator first, InputIterator last)
-{
-    for (auto it = first; it != last; it++)
-    {
-        this->push_back(*it);
-    }
-    _dynamicCap = (int) (3 * (_size ) / 2);
-    _updateCapacity(Iterator());
-}
-
-template <class T, size StaticCapacity>
 void VLVector<T, StaticCapacity>::push_back(const T& value)
 {
     if (_size == StaticCapacity)
     {
+        _dynamicCap = _size == 0 ? 1 : _dynamicCap;
         _changeToDynamic(this->end());
     }
     _size++;
@@ -502,28 +474,6 @@ void VLVector<T, StaticCapacity>::push_back(const T& value)
     *(this->begin() + diff) = value;
     _updateCapacity(this->begin());
 }
-
-//template <class InputIterator>
-//template <class T, size StaticCapacity>
-//typename VLVector<T, StaticCapacity>::Iterator VLVector<T, StaticCapacity>::insert(Iterator pos,
-//        InputIterator first, InputIterator last)
-//{
-//    int numElem = std::distance(first, last);
-//    int off = std::distance(pos, this->end());
-//    if (_size + numElem > StaticCapacity && _size <= StaticCapacity)
-//    {
-//        _dynamicCap = (int) (3 * (_size + numElem) / 2);
-//        pos = _changeToDynamic(pos);
-//    }
-//    T* tmp = new T[off];
-//    std::copy(pos, pos + off, iterator(&tmp[0]));
-//    std::copy(iterator(&tmp[0]), iterator(&tmp[off]), pos + numElem);
-//    std::copy(first, last, pos);
-//    _size += numElem;
-//    delete[] tmp;
-//    pos = _updateCapacity(pos);
-//    return pos;
-//}
 
 template <class T, size StaticCapacity>
 void VLVector<T, StaticCapacity>::pop_back()
@@ -541,7 +491,13 @@ typename VLVector<T, StaticCapacity>::iterator VLVector<T, StaticCapacity>::eras
                                                                                   iterator last)
 {
     int numElem = std::distance(first, last);
-    std::copy(last, this->end(), first);
+    int end1 = std::distance(this->begin(), first);
+    int end2 = std::distance(last, this->end());
+    T* tmp = new T[end1 + end2];
+    std::copy(this->begin(), first, iterator(&tmp[0]));
+    std::copy(last, this->end(), iterator(&tmp[0]) + end1);
+    std::copy(iterator(&tmp[0]), iterator(&tmp[0]) + end1 + end2, this->begin());
+    delete[] tmp;
     size_t newSize =  _size - numElem;
     if (newSize <= StaticCapacity)
     {
@@ -550,6 +506,27 @@ typename VLVector<T, StaticCapacity>::iterator VLVector<T, StaticCapacity>::eras
     }
     _size = newSize;
     return first;
+}
+
+template <class T, size StaticCapacity>
+template<class InputIterator>
+typename VLVector<T, StaticCapacity>::iterator VLVector<T, StaticCapacity>::insert(Iterator pos, InputIterator first, InputIterator last)
+{
+    int numElem = std::distance(first, last);
+    int off = std::distance(pos, this->end());
+    if (_size + numElem > StaticCapacity && _size <= StaticCapacity)
+    {
+        _dynamicCap = (int) (3 * (_size + numElem) / 2);
+        pos = _changeToDynamic(pos);
+    }
+    T* tmp = new T[off];
+    std::copy(pos, pos + off, iterator(&tmp[0]));
+    std::copy(iterator(&tmp[0]), iterator(&tmp[off]), pos + numElem);
+    std::copy(first, last, pos);
+    _size += numElem;
+    delete[] tmp;
+    pos = _updateCapacity(pos);
+    return pos;
 }
 
 template <class T, size StaticCapacity>
@@ -609,7 +586,7 @@ typename VLVector<T, StaticCapacity>::Iterator VLVector<T, StaticCapacity>::_upd
     {
         _dynamicCap = (int) (3 * (_size + 1) / 2);
     }
-    if (_size == _dynamicCap && _size > StaticCapacity)
+    else if (_size == _dynamicCap && _size > StaticCapacity)
     {
         _dynamicCap = (int) (3 * (_size + 1) / 2);
         T *newDynamicArr = new T[_dynamicCap];
